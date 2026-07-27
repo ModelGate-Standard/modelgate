@@ -4,6 +4,7 @@
 [![Python versions](https://img.shields.io/pypi/pyversions/modelgate-mgs.svg)](https://pypi.org/project/modelgate-mgs/)
 [![Conformance](https://github.com/ModelGate-Standard/modelgate/actions/workflows/conformance.yml/badge.svg)](https://github.com/ModelGate-Standard/modelgate/actions/workflows/conformance.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21630072.svg)](https://doi.org/10.5281/zenodo.21630072)
 
 **Repository:** https://github.com/modelgate-standard/modelgate
 
@@ -119,7 +120,7 @@ reproduce every one of these exactly, or CI fails
 
 ## Citing
 
-If you use MGS or `modelgate` in a paper, cite the specific version you ran against — see [`CITATION.cff`](CITATION.cff) (GitHub renders a "Cite this repository" button from it). A DOI will be added here once minted. Include the `spec_version` and `dataset_hash` from your `Report` too — that's what makes the claim checkable by someone else, not just the citation.
+If you use MGS or `modelgate` in a paper, cite the specific version you ran against — see [`CITATION.cff`](CITATION.cff) (GitHub renders a "Cite this repository" button from it), or use the DOI directly: [10.5281/zenodo.21630072](https://doi.org/10.5281/zenodo.21630072). Include the `spec_version` and `dataset_hash` from your `Report` too — that's what makes the claim checkable by someone else, not just the citation.
 
 ---
 
