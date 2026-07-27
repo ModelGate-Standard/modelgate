@@ -1,0 +1,42 @@
+name: MGS Conformance
+
+# CI must fail on any conformance mismatch — this is the gate that makes
+# MGS a specification rather than a claim: any PR that changes
+# modelgate-core's Reader/Checker/Report behavior has to still reproduce
+# every frozen expected/*.json exactly, or this fails.
+#
+# This repo is library-only, scoped to modelgate-core + its CLI
+# (CONTRIBUTING.md).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  conformance-core:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install modelgate-core
+        run: pip install -e packages/modelgate-core
+
+      - name: Run conformance corpus
+        run: python3 conformance/runner.py
+
+      - name: Run quickstart notebook
+        # The example in examples/quickstart.ipynb is the primary
+        # documented use case (check a dataset before training, in a
+        # notebook) — it must actually keep running, not just look
+        # plausible. `jupyter execute` fails the step on any cell error.
+        run: |
+          pip install jupyter nbclient
+          jupyter execute packages/modelgate-core/examples/quickstart.ipynb --output /tmp/quickstart_ci_check.ipynb

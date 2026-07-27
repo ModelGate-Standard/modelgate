@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "modelgate-mgs"
+version = "1.0.1"
+description = "Reference implementation of MGS (Model Gate Standard) — dataset quality evaluation for computer vision datasets."
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.11"
+authors = [
+    { name = "Agrieby Chaniago" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Quality Assurance",
+    "Typing :: Typed",
+]
+
+# Zero infra dependencies, deliberately: no FastAPI, SQLAlchemy, MinIO,
+# pika. modelgate-core MUST be installable and runnable with nothing
+# but Python + these.
+dependencies = [
+    "Pillow>=10.3.0",
+    "numpy>=1.26.4",
+    "imagehash>=4.3.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.10",
+    "pytest>=8.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/modelgate-standard/modelgate"
+Specification = "https://github.com/modelgate-standard/modelgate/blob/main/specs/mgs/MGS-1.0.md"
+Changelog = "https://github.com/modelgate-standard/modelgate/blob/main/packages/modelgate-core/CHANGELOG.md"
+
+# CLI command name kept independent of the PyPI project name (same
+# pattern as beautifulsoup4 -> bs4).
+[project.scripts]
+modelgate = "modelgate.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/modelgate"]
+
+[tool.mypy]
+strict = true
+packages = ["modelgate"]

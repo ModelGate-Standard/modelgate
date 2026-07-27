@@ -1,0 +1,88 @@
+# Contributing to ModelGate / MGS
+
+Thanks for considering a contribution. A few things worth knowing before
+you start, since this project has a somewhat unusual shape (a
+specification plus a reference implementation, not just a library).
+
+## What lives where
+
+```
+packages/
+  modelgate-core/     the reference implementation — Python, this is
+                       where you want to make changes. This repo is
+                       library-only; there's nothing else under packages/.
+specs/mgs/               the MGS specification itself
+conformance/             the corpus that proves conformance (see below)
+```
+
+This repo is library-only by design. Any future non-library interface
+(a server, a GitHub Action, whatever) is expected to be a thin consumer
+of `modelgate-core`, never its own implementation of the checkers below
+— that's the one rule that matters most. See `ARCHITECTURE.md` for the
+full design.
+
+## The one rule that matters most
+
+**All audit logic lives in `modelgate-core`. Nothing else — not a
+server, not a GitHub Action, not any future interface — is allowed to
+implement its own checker.** If you're fixing a bug in how duplicates
+are detected, or how class balance is computed, the fix belongs in
+`packages/modelgate-core/src/modelgate/_checkers/`.
+
+## Conformance is not optional
+
+Any change to `modelgate-core`'s Reader, Checker, or Report logic has
+to still reproduce every fixture in `conformance/expected/*.json`
+exactly:
+
+```bash
+python3 conformance/runner.py
+```
+
+If your change is a deliberate, intentional behavior change (not a
+bug fix), that's a spec change — see `specs/mgs/MGS-1.0.md` §8 on
+versioning, and open an issue to discuss it before writing code. MGS
+1.0 is frozen; changing §5 (Requirements) means MGS 1.1+, not editing
+the existing spec document.
+
+If you add a new fixture, freeze its expected output with:
+
+```bash
+python3 conformance/runner.py --update
+```
+
+— but only after reviewing that the output is actually correct, not
+just "whatever the code currently produces." An expected file that
+encodes a bug is worse than no fixture at all.
+
+## Adding a new Reader (new dataset format)
+
+This is the extension point the whole Reader/Manifest/Checker split
+exists for — see `ARCHITECTURE.md`. A new Reader:
+
+1. Lives in `packages/modelgate-core/src/modelgate/_readers/`.
+2. Produces a `Manifest` matching `specs/mgs/MGS-1.0.md` §2.2 exactly —
+   no extra normative fields, though implementation-internal fields
+   (like `Sample.source_path`) are fine, see the schema note in the spec.
+3. Comes with at least one conformance fixture proving its `dataset_hash`
+   matches an equivalent fixture in another format, if one exists (see
+   `conformance/fixtures/imagefolder-equivalent/` vs.
+   `adhoc-flat-class.zip` for the pattern).
+
+## Development setup
+
+```bash
+cd packages/modelgate-core
+pip install -e ".[dev]"
+```
+
+No Docker needed — that's the point of `modelgate-core` being
+dependency-free. This repo doesn't contain anything that needs it.
+
+## Commit messages and PRs
+
+Explain the *why*, not just the *what* — especially for anything
+touching threshold values, verdict logic, or the Manifest schema. If
+you found something surprising while implementing a change (a
+pre-existing bug, a race condition, a spec ambiguity), say so — that
+context is what future contributors (and future you) will need.

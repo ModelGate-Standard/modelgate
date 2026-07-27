@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "ModelGate: A Reference Implementation of MGS (Model Gate Standard)"
+authors:
+  - family-names: Chaniago
+    given-names: Agriby D.
+version: 1.0.1
+date-released: "2026-07-28"
+url: "https://github.com/ModelGate-Standard/modelgate"
+repository-code: "https://github.com/ModelGate-Standard/modelgate"
+license: Apache-2.0
+keywords:
+  - computer-vision
+  - dataset-quality
+  - dataset-validation
+  - machine-learning
+  - reproducibility

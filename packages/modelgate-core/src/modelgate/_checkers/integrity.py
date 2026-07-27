@@ -1,0 +1,51 @@
+"""MGS-0002 — Integrity (spec §5.2).
+
+Detects corrupted/unreadable images via PIL open + verify, reading
+Sample.source_path from the Manifest — never walking the filesystem
+directly (see ARCHITECTURE.md).
+"""
+
+from PIL import Image
+
+from modelgate._rounding import round4
+from modelgate.manifest import Manifest
+from modelgate.report import RequirementResult
+
+REQUIREMENT_ID = "MGS-0002"
+
+
+def check(manifest: Manifest, config: dict) -> RequirementResult:
+    total = len(manifest.samples)
+    if total == 0:
+        # MGS-0000: no samples means nothing was evaluated — never PASS.
+        return RequirementResult(
+            id=REQUIREMENT_ID, verdict="NOT_EVALUATED", config={}, metrics={}, findings=[]
+        )
+
+    findings = []
+    for sample in manifest.samples:
+        try:
+            with Image.open(sample.source_path) as img:
+                img.verify()
+        except Exception as e:
+            # type(e).__name__ only — NOT str(e). PIL's exception message
+            # embeds the absolute source_path it tried to open (e.g. a
+            # freshly-mkdtemp'd extraction dir for ZipReader), which is
+            # ephemeral and differs on every run and every machine. A
+            # finding must be reproducible (spec §7) — sample.uri already
+            # identifies which file, so the error type is enough signal
+            # without leaking a non-reproducible path into the Report.
+            findings.append({"uri": sample.uri, "error": type(e).__name__})
+
+    findings.sort(key=lambda f: f["uri"])  # spec §6.3 — byte-wise ordering
+    corruption_rate = round4(len(findings) / total)
+    # Any corruption fails — see spec §5.2 for why no tolerance threshold exists.
+    verdict = "FAIL" if corruption_rate > 0.0 else "PASS"
+
+    return RequirementResult(
+        id=REQUIREMENT_ID,
+        verdict=verdict,
+        config={},
+        metrics={"corruption_rate": corruption_rate, "total": total, "corrupted": len(findings)},
+        findings=findings,
+    )
